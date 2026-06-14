@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from kalshi_console.kalshi.endpoints import HOSTS, Env, Hosts
+
+
+def _default_secrets_dir() -> Path:
+    return Path.home() / ".kalshi-console"
 
 
 class Settings(BaseSettings):
@@ -21,8 +25,23 @@ class Settings(BaseSettings):
     env: Env = Env.demo
     api_key_id: str | None = None
     private_key_path: Path | None = None
-    secrets_dir: Path = Field(default_factory=lambda: Path.home() / ".kalshi-console")
+    secrets_dir: Path = Field(default_factory=_default_secrets_dir)
     http_port: int = 8000
+
+    @field_validator("api_key_id", "private_key_path", mode="before")
+    @classmethod
+    def _blank_to_none(cls, v: object) -> object:
+        """A copied .env ships these keys present-but-empty; treat "" as unset."""
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
+    @field_validator("secrets_dir", mode="before")
+    @classmethod
+    def _blank_secrets_dir_to_default(cls, v: object) -> object:
+        if v is None or (isinstance(v, str) and v.strip() == ""):
+            return _default_secrets_dir()
+        return v
 
     @property
     def hosts(self) -> Hosts:

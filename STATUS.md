@@ -4,7 +4,7 @@ A Python, human-in-the-loop **assisted-execution console** for Kalshi: ingests l
 tracks positions/PnL, surfaces signals/alerts, and prepares one-click order tickets — **read-only,
 no autonomous trading** in v1. Demo-first.
 
-**Last updated:** 2026-06-14 · **Branch:** `main` · **Tests:** 39 passing
+**Last updated:** 2026-06-14 · **Branch:** `main` · **Tests:** 40 passing
 
 > Legend: `[x]` done · `[ ]` not started · `[~]` in progress / blocked on input
 
@@ -25,8 +25,8 @@ no autonomous trading** in v1. Demo-first.
 - [x] Minimal signed async REST client
 - [x] `kalshi-onboard` CLI (`self-test` / `store-key` / `verify`)
 - [x] Onboarding runbook (`README.md`)
-- [~] **Manual, on you:** create a demo account at `demo.kalshi.co`, generate an API key, then
-  `kalshi-onboard store-key` + `kalshi-onboard verify` (live signed reads against demo)
+- [x] **Manual onboarding done:** demo account created, API key stored (`0600`), `verify` confirms
+  live signed reads against demo (`/exchange/status` + `/portfolio/balance`, $100 sandbox balance)
 
 ### [ ] M1 — Read core + dashboard shell
 - [ ] `app/money.py` — `Decimal` parse/format for `*_dollars`/`*_fp` + integer-cent stragglers
@@ -75,4 +75,4 @@ uv run kalshi-onboard --help
 ```
 
 ## Next action
-Onboard to demo (manual, ~5 min), then continue with the M1 plan.
+M0 complete (demo onboarding verified). Say "plan M1" to write the M1 implementation plan.
