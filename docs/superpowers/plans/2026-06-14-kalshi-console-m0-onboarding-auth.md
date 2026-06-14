@@ -146,7 +146,7 @@ Expected: PASS (`test_import_package`). If you use `pip` instead of `uv`: `pytho
 
 ```bash
 rm tests/test_smoke.py
-git add pyproject.toml .env.example src/ tests/
+git add pyproject.toml .env.example uv.lock src/ tests/
 git commit -m "chore: scaffold kalshi_console package and test tooling"
 ```
 
