@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Block secrets from being committed.
+#
+# Rejects any staged file that looks like an environment file (.env, .env.*)
+# or a private-key file (*.pem, *.key). Templates such as .env.example are allowed.
+#
+# Installed via: scripts/install-hooks.sh
+# Bypass (use sparingly, only when you are sure): git commit --no-verify
+
+set -eu
+
+# Names/paths that are safe to commit even though they match .env*
+is_allowed() {
+	case "$1" in
+		*.env.example | .env.example | \
+		*.env.sample | .env.sample | \
+		*.env.template | .env.template)
+			return 0 ;;
+		*)
+			return 1 ;;
+	esac
+}
+
+is_blocked() {
+	case "$1" in
+		.env | *.env | .env.* | */.env | */.env.*)
+			return 0 ;;
+		*.pem | */*.pem | *.key | */*.key)
+			return 0 ;;
+		*)
+			return 1 ;;
+	esac
+}
+
+blocked=""
+
+# Only inspect files staged for addition/copy/modification/rename.
+for file in $(git diff --cached --name-only --diff-filter=ACMR); do
+	if is_allowed "$file"; then
+		continue
+	fi
+	if is_blocked "$file"; then
+		blocked="$blocked  $file\n"
+	fi
+done
+
+if [ -n "$blocked" ]; then
+	printf >&2 "\n\033[31mpre-commit: refusing to commit secret files:\033[0m\n"
+	printf >&2 "$blocked"
+	printf >&2 "\nThese match .env / *.pem / *.key and likely contain secrets.\n"
+	printf >&2 "If a file is genuinely safe, rename it (e.g. .env.example) or commit with:\n"
+	printf >&2 "  git commit --no-verify\n\n"
+	exit 1
+fi
+
+exit 0
