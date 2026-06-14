@@ -43,3 +43,20 @@ def test_settings_derived_private_key_path(monkeypatch, tmp_path: Path):
     monkeypatch.delenv("KALSHI_PRIVATE_KEY_PATH", raising=False)
     s = Settings(_env_file=None)
     assert s.resolved_private_key_path() == tmp_path / "demo" / "private_key.pem"
+
+
+def test_settings_empty_env_strings_treated_as_unset(monkeypatch):
+    """Empty values in a copied .env (e.g. `KALSHI_SECRETS_DIR=`) must mean "unset",
+    not Path("."). Otherwise store-key writes into the repo and self-test reads a dir."""
+    monkeypatch.setenv("KALSHI_ENV", "demo")
+    monkeypatch.setenv("KALSHI_API_KEY_ID", "")
+    monkeypatch.setenv("KALSHI_PRIVATE_KEY_PATH", "")
+    monkeypatch.setenv("KALSHI_SECRETS_DIR", "")
+    s = Settings(_env_file=None)
+    assert s.api_key_id is None
+    assert s.private_key_path is None
+    assert s.secrets_dir == Path.home() / ".kalshi-console"
+    assert (
+        s.resolved_private_key_path()
+        == Path.home() / ".kalshi-console" / "demo" / "private_key.pem"
+    )
