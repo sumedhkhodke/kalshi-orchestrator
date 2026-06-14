@@ -42,3 +42,5 @@ def store_private_key_pem(secrets_dir: str | Path, env: str, pem: str | bytes) -
 def generate_rsa_keypair() -> RSAPrivateKey:
     """Generate a 2048-bit RSA private key for onboarding or the upload flow."""
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+
